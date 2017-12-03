@@ -109,34 +109,32 @@
             armorPercent[1] -= 15;
             armorPercent[2] -= 15;
             itemsLeft = true;
-
         }
+
         if (!itemsLeft) {
             return;
         }
 
-        for (var i = 0; i < target.items.length - 1; i++) {
+        if (itemPercent[0] && rand >= itemPercent[1] && rand < itemPercent[2]) {
+            itemGiven = ["i"];
+            itemGiven.push(target.items.pop());
+            $gameParty.gainItem($dataItems[Number(itemGiven[1][0])], Number(itemGiven[1][1]));
 
-            if (itemPercent[0] && rand >= itemPercent[1] && rand < itemPercent[2]) {
-                itemGiven = ["i"];
-                itemGiven.push(target.items.pop());
-                $gameParty.gainItem($dataItems[Number(itemGiven[0])], Number(itemGiven[1]));
+        } else if (armorPercent[0] && rand >= armorPercent[1] && rand < armorPercent[2]) {
+            itemGiven = ["a"];
+            itemGiven.push(target.armors.pop());
+            $gameParty.gainItem($dataArmors[Number(itemGiven[1][0])], Number(itemGiven[1][1]));
 
-            } else if (armorPercent[0] && rand >= armorPercent[1] && rand < armorPercent[2]) {
-                itemGiven = ["a"];
-                itemGiven.push(target.armors.pop());
-                $gameParty.gainItem($dataArmors[Number(itemGiven[0])], Number(itemGiven[1]));
+        } else if (weaponPercent[0] && rand >= weaponPercent[1] && rand < weaponPercent[2]) {
+            itemGiven = ["w"];
+            itemGiven.push(target.weapons.pop());
+            $gameParty.gainItem($dataWeapons[Number(itemGiven[1][0])], Number(itemGiven[1][1]));
 
-            } else if (weaponPercent[0] && rand >= weaponPercent[1] && rand < weaponPercent[2]) {
-                itemGiven = ["w"];
-                itemGiven.push(target.weapons.pop());
-                $gameParty.gainItem($dataWeapons[Number(itemGiven[0])], Number(itemGiven[1]));
-
-            } else {
-                succeed = false;
-            }
-
+        } else {
+            succeed = false;
         }
+
+
         console.log(itemGiven);
     };
 
@@ -144,8 +142,8 @@
     Window_BattleLog.prototype.displayActionResults = function(subject, target) {
         _Window_BattleLog_displayActionResults.call(this, subject, target);
         if (itemGiven.length > 0) {
-            this.push('addText', itemGiven[0]);
-            itemGiven = [];
+            this.clear();
+            this.push('addText', subject.name() + " robó " + itemGiven[0] + " de " + target.name() + ".");
         }
 
     };

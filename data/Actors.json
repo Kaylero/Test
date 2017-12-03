@@ -1,6 +1,6 @@
 [
 null,
-{"id":1,"battlerName":"Lero","characterIndex":0,"characterName":"Lero_andando","classId":1,"equips":[0,0,0,3,0],"faceIndex":0,"faceName":"Lero","traits":[],"initialLevel":1,"maxLevel":99,"name":"Lero","nickname":"","note":"","profile":""},
+{"id":1,"battlerName":"Actor1_1","characterIndex":0,"characterName":"Actor1","classId":1,"equips":[0,0,0,3,0],"faceIndex":0,"faceName":"Actor1","traits":[],"initialLevel":1,"maxLevel":99,"name":"Lero","nickname":"","note":"","profile":""},
 {"id":2,"battlerName":"Laura","characterIndex":0,"characterName":"Laura_andando","classId":3,"equips":[3,1,2,3,0],"faceIndex":0,"faceName":"Laura","traits":[],"initialLevel":1,"maxLevel":99,"name":"Laura","nickname":"","note":"","profile":""},
 {"id":3,"battlerName":"Aitor","characterIndex":0,"characterName":"Aitor_andando","classId":5,"equips":[5,0,2,3,4],"faceIndex":0,"faceName":"Aitor","traits":[],"initialLevel":1,"maxLevel":99,"name":"Aitor","nickname":"","note":"","profile":""},
 {"id":4,"battlerName":"Actor2_7","characterIndex":6,"characterName":"Actor2","classId":6,"equips":[4,0,2,3,4],"faceIndex":6,"faceName":"Actor2","traits":[],"initialLevel":1,"maxLevel":99,"name":"Albert","nickname":"","note":"","profile":""}
