@@ -7,7 +7,7 @@
     var stealSkillSuccessText = String(parameters['Skill Success Text'] || "%1 stole skill %2 from %3!");
     var stealFailText = String(parameters['Steal Fail Text'] || "%1 failed to steal from %2.");
     var nothingLeftText = String(parameters['Nothing Left Text'] || "%1 doesn't have anything left!");
-    var stealing = false;
+    var succeed = false;
     var itemGiven = [];
 
     var _Game_Enemy_setup = Game_Enemy.prototype.setup;
@@ -16,13 +16,31 @@
         _Game_Enemy_setup.call(this, enemyId, x, y);
 
         this.items = [];
+        this.armors = [];
+        this.weapons = [];
         var data = this.enemy().meta.items.split(",");
-        var items = []
+        var items = [];
+        var armors = [];
+        var weapons = [];
 
-        data.forEach(function(element){
-            items.push(element.split("_"));
+        data.forEach(function (element) {
+            var list = element.toString().split("_");
+            switch (list[0]) {
+                case "i":
+                    items.push(list.slice(1,3));
+                    break;
+                case "a":
+                    armors.push(list.slice(1,3));
+                    break;
+                case"w":
+                    weapons.push(list.slice(1,3));
+                    break;
+            }
         });
+
         this.items = items;
+        this.armors = armors;
+        this.weapons = weapons;
     };
 
     Game_Enemy.prototype.canBeStolen = function() {
@@ -59,7 +77,6 @@
         _Game_Interpreter_pluginCommand.call(this, command, args);
 
         if (command === 'Steal') {
-            stealing = true;
         }
     };
 
@@ -68,84 +85,66 @@
         var itemPercent = [false, 0, 90];
         var armorPercent =[false, 50, 75];
         var weaponPercent = [false, 75, 90];
-        var items = [];
-        var weapons = [];
-        var armors = [];
-        var succeed = false;
-        var firstTime = true;
+        var itemsLeft = false;
+        succeed = false;
         itemGiven = [];
 
-        console.log(target.items);
+        if (target.items.length > 0) {
+            itemPercent[0] = true;
+            armorPercent[1] += 15;
+            armorPercent[2] += 15;
+            itemsLeft = true;
+        }
 
-        target.items.forEach(function(element){
-            switch(element[0]){
-                case "i":
-                    if (!itemPercent[0]) {
-                        itemPercent[0] = true;
-                        armorPercent[1] += 15;
-                        armorPercent[2] += 15;
-                    }
-                    items.push([element[1],element[2]]);
-                    break;
+        if (target.armors.length > 0) {
+            armorPercent[0] = true;
+            itemPercent[2] -= 25;
+            itemsLeft = true;
 
-                case "a":
-                    if (!armorPercent [0]) {
-                        armorPercent[0] = true;
+        }
 
-                        itemPercent[2] -= 25;
-                    }
-                    armors.push([element[1],element[2]]);
-                    break;
+        if (target.weapons.length > 0) {
+            weaponPercent[0] = true;
+            itemPercent[2] -= 15;
+            armorPercent[1] -= 15;
+            armorPercent[2] -= 15;
+            itemsLeft = true;
 
-                case "w":
-                    if (!weaponPercent[0]) {
-                        weaponPercent[0] = true;
-                        itemPercent[2] -= 15;
-                        armorPercent[1] -= 15;
-                        armorPercent[2] -= 15;
-                    }
-                    weapons.push([element[1],element[2]]);
-                    break;
-            }
-        });
+        }
+        if (!itemsLeft) {
+            return;
+        }
 
         for (var i = 0; i < target.items.length - 1; i++) {
 
             if (itemPercent[0] && rand >= itemPercent[1] && rand < itemPercent[2]) {
-                if (items.length > 0) {
-                    itemGiven = items.pop();
-                    $gameParty.gainItem($dataItems[Number(itemGiven[0])], Number(itemGiven[1]));
-                } else {
-                    succeed = false;
-                }
+                itemGiven = ["i"];
+                itemGiven.push(target.items.pop());
+                $gameParty.gainItem($dataItems[Number(itemGiven[0])], Number(itemGiven[1]));
 
             } else if (armorPercent[0] && rand >= armorPercent[1] && rand < armorPercent[2]) {
-                if (armors.length > 0) {
-                    itemGiven = armors.pop();
-                    $gameParty.gainItem($dataArmors[Number(itemGiven[0])], Number(itemGiven[1]));
-                } else {
-                    succeed = false;
-                }
+                itemGiven = ["a"];
+                itemGiven.push(target.armors.pop());
+                $gameParty.gainItem($dataArmors[Number(itemGiven[0])], Number(itemGiven[1]));
 
             } else if (weaponPercent[0] && rand >= weaponPercent[1] && rand < weaponPercent[2]) {
-                if (weapons.length > 0) {
-                    itemGiven = weapons.pop();
-                    $gameParty.gainItem($dataWeapons[Number(itemGiven[0])], Number(itemGiven[1]));
-                } else {
-                    succeed = false;
-                }
+                itemGiven = ["w"];
+                itemGiven.push(target.weapons.pop());
+                $gameParty.gainItem($dataWeapons[Number(itemGiven[0])], Number(itemGiven[1]));
+
             } else {
                 succeed = false;
             }
 
         }
+        console.log(itemGiven);
     };
 
     var _Window_BattleLog_displayActionResults = Window_BattleLog.prototype.displayActionResults;
     Window_BattleLog.prototype.displayActionResults = function(subject, target) {
         _Window_BattleLog_displayActionResults.call(this, subject, target);
         if (itemGiven.length > 0) {
-            this.push('addText', itemGiven[0])
+            this.push('addText', itemGiven[0]);
             itemGiven = [];
         }
 
