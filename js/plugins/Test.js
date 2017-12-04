@@ -2,13 +2,12 @@
 (function() {
 
     var parameters = PluginManager.parameters('Steal');
-    var stealMode = Number(parameters['Steal Mode'] || 1);
-    var stealSuccessText = String(parameters['Steal Success Text'] || "%1 stole %2 from %3!");
-    var stealSkillSuccessText = String(parameters['Skill Success Text'] || "%1 stole skill %2 from %3!");
-    var stealFailText = String(parameters['Steal Fail Text'] || "%1 failed to steal from %2.");
-    var nothingLeftText = String(parameters['Nothing Left Text'] || "%1 doesn't have anything left!");
-    var succeed = false;
+    var stealSuccessText = String(parameters['Steal Success Text'] || "%1 robó %2 de %3");
+    var stealFailText = String(parameters['Steal Fail Text'] || "%1 no pudo robar nada de %2.");
+    var nothingLeftText = String(parameters['Nothing Left Text'] || "%1 no tiene nada que robarle.");
     var itemGiven = [];
+    var itemsLeft = false;
+    var stealing = false;
 
     var _Game_Enemy_setup = Game_Enemy.prototype.setup;
 
@@ -67,6 +66,7 @@
         var result = target.result();
         if (result.isHit() && this.item().meta.steal) {
             $gameSystem.steal(target);
+            this.makeSuccess(target);
         } else {
         }
     };
@@ -85,9 +85,9 @@
         var itemPercent = [false, 0, 90];
         var armorPercent =[false, 50, 75];
         var weaponPercent = [false, 75, 90];
-        var itemsLeft = false;
-        succeed = false;
+        itemsLeft = false;
         itemGiven = [];
+        stealing = true;
 
         if (target.items.length > 0) {
             itemPercent[0] = true;
@@ -130,20 +130,33 @@
             itemGiven.push(target.weapons.pop());
             $gameParty.gainItem($dataWeapons[Number(itemGiven[1][0])], Number(itemGiven[1][1]));
 
-        } else {
-            succeed = false;
         }
-
-
-        console.log(itemGiven);
     };
 
     var _Window_BattleLog_displayActionResults = Window_BattleLog.prototype.displayActionResults;
     Window_BattleLog.prototype.displayActionResults = function(subject, target) {
         _Window_BattleLog_displayActionResults.call(this, subject, target);
-        if (itemGiven.length > 0) {
-            this.clear();
-            this.push('addText', subject.name() + " robó " + itemGiven[0] + " de " + target.name() + ".");
+        if (stealing) {
+            if (itemGiven.length > 0) {
+                switch(itemGiven[0]) {
+                    case "i":
+                        this.push('addText',stealSuccessText.format(subject.name(), $dataItems[Number(itemGiven[1][0])].name, target.name()));
+                        break;
+                    case "a":
+
+                        this.push('addText',stealSuccessText.format(subject.name(), $dataArmors[Number(itemGiven[1][0])].name, target.name()));
+                        break;
+                    case "w":
+                        this.push('addText',stealSuccessText.format(subject.name(), $dataWeapons[Number(itemGiven[1][0])].name, target.name()));
+                        break;
+                }
+            } else if(itemsLeft) {
+                this.push('addText', stealFailText.format(subject.name(),  target.name()));
+            } else {
+                this.push('addText', nothingLeftText.format(subject.name()));
+            }
+
+            stealing = false;
         }
 
     };
